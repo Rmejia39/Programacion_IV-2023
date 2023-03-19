@@ -1,24 +1,45 @@
-var generarIdUnicoFecha = ()=>{
-    let fecha = new Date();
-    return Math.floor(fecha.getTime()/1000).toString(16);
-};
-var appSistema = new Vue({
-    el: '#appSistema',
+//const { createApp } = Vue; //Es exclusivo de la v3 de Vue.js
+var db;
+//createApp({
+var app = new Vue({
+    el: "#app",
     data: {
         forms:{
-            'matricula':{mostrar:false},
-            'alumno':{mostrar:false},
-            'docente':{mostrar:false},
-            'materia':{mostrar:false},
-            'inscripcion':{mostrar:false}
+            docente     : {mostrar:false},
+            alumno      : {mostrar:false},
+            materia     : {mostrar:false},
+            matricula   : {mostrar:false},
+            inscripcion : {mostrar:false},
         }
     },
-});
-document.addEventListener('DOMContentLoaded', e=>{
-    let formularios = document.querySelectorAll('.mostrar').forEach(formulario=>{
-        formulario.addEventListener('click', evento=>{
-            let formulario = evento.target.dataset.form;
-            appSistema.forms[formulario].mostrar = true;
-        });
-    });
+    methods:{
+        abrirFormulario(form){
+            this.forms[form].mostrar = !this.forms[form].mostrar;
+            this.$refs[form].listar();
+        },
+        abrirBD(){
+            let indexDB = indexedDB.open('db_sistema_academico',1);
+            indexDB.onupgradeneeded=e=>{
+                let req = e.target.result,
+                    tbldocente = req.createObjectStore('tbldocentes', {keyPath:'idDocente'}),
+                    tblalumno = req.createObjectStore('tblalumnos',{keyPath:'idAlumno'}),
+                    tblmateria = req.createObjectStore('tblmaterias',{keyPath:'idMateria'}),
+                    tblmatricula = req.createObjectStore('tblmatriculas',{keyPath:'idMatricula'});
+
+                tbldocente.createIndex('idDocente', 'idDocente', {unique:true});
+                tblalumno.createIndex('idAlumno', 'idAlumno', {unique:true});
+                tblmateria.createIndex('idMateria', 'idMateria', {unique:true});
+                tblmateria.createIndex('idMatricula', 'idMatricula', {unique:true});
+            };
+            indexDB.onsuccess= e=>{
+                db = e.target.result;
+            };
+            indexDB.onerror= e=>{
+                console.error( e );
+            };
+        }, 
+    },
+    created() {
+        this.abrirBD();
+    }
 });
