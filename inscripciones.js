@@ -1,19 +1,24 @@
-Vue.component('v-select-inscripciones', VueSelect.VueSelect);
+Vue.component('v-select-materias', VueSelect.VueSelect);
+Vue.component('v-select-alumnos', VueSelect.VueSelect);
 Vue.component('component-inscripciones',{
     data() {
         return {
             accion:'nuevo',
             buscar: '',
-            materias: [],
-            inscripciones : [],
+            inscripciones: [],
+            materias : [],
+            alumnos :[],
             inscripcion:{
-                idInscripcion   : '',
-                mate : {
-                materiaUno      : '',
-                materiaDos      : '',
-                materiaTres     : '',
-                materiaCuatro   : '',
-                materiaCinco    : ''
+                idInscripcion  : '',
+                codigo     : '',
+                fecha      :'',
+                materia    : {
+                    id    : '',
+                    label : ''
+                },
+                alumno     :{
+                    id     : '',
+                    label  : ''
                 },
             }
         }
@@ -23,37 +28,38 @@ Vue.component('component-inscripciones',{
             this.listar();
             if(this.accion==='nuevo'){
                 this.inscripcion.idInscripcion = new Date().getTime().toString(16);
-                this.inscripciones.push( JSON.parse( JSON.stringify(this.inscripcion) ) );
+                this.inscripcions.push( JSON.parse( JSON.stringify(this.inscripcion) ) );
             }else if(this.accion==='modificar'){
-                let index = this.inscripciones.findIndex(inscripcion=>inscripcion.idInscripcion==this.inscripcion.idInscripcion);
-                this.inscripciones[index] = JSON.parse( JSON.stringify(this.inscripcion) );
+                let index = this.inscripcions.findIndex(inscripcion=>inscripcion.idInscripcion==this.inscripcion.idInscripcion);
+                this.inscripcions[index] = JSON.parse( JSON.stringify(this.inscripcion) );
             }else if(this.accion==='eliminar'){
-                let index = this.inscripciones.findIndex(inscripcion=>inscripcion.idInscripcion==this.inscripcion.idInscripcion);
-                this.inscripciones.splice(index,1);
+                let index = this.inscripcions.findIndex(inscripcion=>inscripcion.idInscripcion==this.inscripcion.idInscripcion);
+                this.inscripcions.splice(index,1);
             }
             localStorage.setItem("inscripciones", JSON.stringify(this.inscripciones) );
-            fetch(`private/modulos/tablas/inscripciones.php?accion=${this.accion}&inscripciones=${JSON.stringify(this.inscripcion)}`)
+            fetch(`private/modulos/inscripciones/inscripciones.php?accion=${this.accion}&inscripciones=${JSON.stringify(this.inscripcion)}`)
             .then(resp=>resp.json())
             .then(resp=>{
                 console.log(resp);
             });
-            this.nuevaInscripcion();
+            this.nuevoInscripcion();
         },
         eliminarInscripcion(inscripcion){
-            if( confirm(`Esta seguro de eliminar a ${inscripcion.materiaUno}?`) ){
+            if( confirm(`Esta seguro de eliminar a ${inscripcion.codigo}?`) ){
                 this.accion='eliminar';
                 this.inscripcion=inscripcion;
                 this.guardarInscripcion();
             }
         },
-        nuevaInscripcion(){
+        nuevoInscripcion(){
             this.accion = 'nuevo';
-            this.inscripcion.idInscripcion   = '';
-            this.inscripcion.materiaUno      = '';
-            this.inscripcion.materiaDos      = '';
-            this.inscripcion.materiaTres     = '';
-            this.inscripcion.materiaCuatro   = '';
-            this.inscripcion.materiaCinco    = '';
+            this.inscripcion.idInscripcion = '';
+            this.inscripcion.codigo= '';
+            this.inscripcion.alumno.id = '';
+            this.inscripcion.alumno.label='';
+            this.inscripcion.materia.id = '';
+            this.inscripcion.materia.label = '';
+            this.inscripcion.fecha='';
         },
         modificarInscripcion(inscripcion){
             this.accion = 'modificar';
@@ -61,12 +67,18 @@ Vue.component('component-inscripciones',{
         },
         listar(){
             this.inscripciones = JSON.parse( localStorage.getItem('inscripciones') || "[]" )
-                .filter(inscripcion=>inscripcion.materia.mate.toLowerCase().indexOf(this.buscar.toLowerCase())>-1 ||
-                    inscripcion.mate.indexOf(this.buscar)>-1);      
+                .filter(inscripcion=>inscripcion.alumno.label.toLowerCase().indexOf(this.buscar.toLowerCase())>-1 ||
+                    inscripcion.codigo.indexOf(this.buscar)>-1);
             this.materias = JSON.parse( localStorage.getItem('materias') || "[]" ).map(materia=>{
                 return { 
                     id: materia.idMateria,
                     label : materia.nombre
+                }
+            }),
+            this.alumnos = JSON.parse( localStorage.getItem('alumnos') || "[]" ).map(alumno=>{
+                return { 
+                    id: alumno.idAlumno,
+                    label : alumno.nombre
                 }
             });
             if( this.inscripciones.length<=0 && this.buscar.trim().length<=0 ){
@@ -81,49 +93,75 @@ Vue.component('component-inscripciones',{
     },
     template: `
         <div class="row">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 <div class="card">
                     <div class="card-header">REGISTRO DE INSCRIPCION</div>
                     <div class="card-body">
-                        <form id="frmInscripcion" @reset.prevent="nuevaInscripcion" v-on:submit.prevent="guardarInscripcion">
+                        <form id="frmInscripcion" @reset.prevent="nuevoInscripcion" v-on:submit.prevent="guardarInscripcion">
                             <div class="row p-1">
                                 <div class="col-3 col-md-2">
-                                    <label for="txtMateriaUno">MATERIA 1:</label>
+                                    <label>Inscripcion Codigo:</label>
                                 </div>
-                                <div class="col-3 col-md-6">
-                                    <v-select-materias required v-model="inscripcion.materiaUno" :options="materias" ></v-select-materias>
+                                <div class="col-3 col-md-3">
+                                    <input required pattern="[0-9]{3}" 
+                                        title="Ingrese un codigo de Inscripcion de 3 digitos"
+                                            v-model="inscripcion.codigo" type="text" class="form-control" name="txtCodigoInscripcion" id="txtCodigoInscripcion">
                                 </div>
                             </div>
                             <div class="row p-1">
                                 <div class="col-3 col-md-2">
-                                    <label for="txtMateriaDos">MATERIA 2:</label>
+                                    <label for="txtCodigoInscripcion">Alumno:</label>
                                 </div>
                                 <div class="col-3 col-md-6">
-                                    <v-select-materias required v-model="inscripcion.materiaDos" :options="materias" ></v-select-materias>
+                                    <v-select-alumnos required v-model="inscripcion.alumno" :options="alumnos" ></v-select-alumnos>
                                 </div>
                             </div>
                             <div class="row p-1">
                                 <div class="col-3 col-md-2">
-                                    <label for="txtMateriaTres">MATERIA 3:</label>
+                                    <label for="txtCodigoInscripcion">Materia 1:</label>
                                 </div>
                                 <div class="col-3 col-md-6">
-                                    <v-select-materias required v-model="inscripcion.materiaTres" :options="materias" ></v-select-materias>
+                                    <v-select-materias required v-model="inscripcion.materia" :options="materias" ></v-select-materias>
                                 </div>
                             </div>
                             <div class="row p-1">
                                 <div class="col-3 col-md-2">
-                                    <label for="txtMateriaCuatro">MATERIA 4:</label>
+                                    <label for="txtCodigoInscripcion">Materia 2:</label>
                                 </div>
                                 <div class="col-3 col-md-6">
-                                    <v-select-materias required v-model="inscripcion.materiaCuatro" :options="materias" ></v-select-materias>
+                                    <v-select-materias required v-model="inscripcion.materiados" :options="materias" ></v-select-materias>
                                 </div>
                             </div>
                             <div class="row p-1">
                                 <div class="col-3 col-md-2">
-                                    <label for="txtMateriCinco">MATERIA 5:</label>
+                                    <label for="txtCodigoInscripcion">Materia 3:</label>
                                 </div>
                                 <div class="col-3 col-md-6">
-                                    <v-select-materias required v-model="inscripcion.materiaCinco" :options="materias" ></v-select-materias>
+                                    <v-select-materias required v-model="inscripcion.materiatres" :options="materias" ></v-select-materias>
+                                </div>
+                            </div>
+                            <div class="row p-1">
+                                <div class="col-3 col-md-2">
+                                    <label for="txtCodigoInscripcion">Materia 4:</label>
+                                </div>
+                                <div class="col-3 col-md-6">
+                                    <v-select-materias required v-model="inscripcion.materiacuatro" :options="materias" ></v-select-materias>
+                                </div>
+                            </div>
+                            <div class="row p-1">
+                                <div class="col-3 col-md-2">
+                                    <label for="txtCodigoInscripcion">Materia 5:</label>
+                                </div>
+                                <div class="col-3 col-md-6">
+                                    <v-select-materias required v-model="inscripcion.materiacinco" :options="materias" ></v-select-materias>
+                                </div>
+                            </div>
+                            <div class="row p-1">
+                                <div class="col-3 col-md-2">
+                                    <label>Fecha:</label>
+                                </div>
+                                <div class="col-9 col-md-3">
+                                    <input required v-model="inscripcion.fecha" type="date" class="form-control">
                                 </div>
                             </div>
                             <div class="row p-1">
@@ -139,33 +177,34 @@ Vue.component('component-inscripciones',{
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 <div class="card">
-                    <div class="card-header">LISTADO DE INSCRIPCIONES</div>
+                    <div class="card-header">LISTADO DE INSCRIPCION</div>
                     <div class="card-body">
                         <table class="table table-bordered table-hover">
                             <thead>
                                 <tr>
                                     <th>BUSCAR:</th>
-                                    <th colspan="5"><input type="text" class="form-control" v-model="buscar"
+                                    <th colspan="3"><input type="text" class="form-control" v-model="buscar"
                                         @keyup="listar()"
                                         placeholder="Buscar por codigo o nombre"></th>
                                 </tr>
                                 <tr>
-                                    <th>MATERIA 1</th>
-                                    <th>MATERIA 2</th>
-                                    <th>MATERIA 3</th>
-                                    <th>MATERIA 4</th>
-                                    <th colspan="2">MATERIA 5</th>
+                                    <th>Codigo</th>
+                                    <th>Nombre</th>
+                                    <th colspan="3">Materia</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="inscripcion in inscripciones" :key="inscripcion.idInscripcion" @click="modificarInscripcion(inscripcion)" >
-                                    <td>{{ inscripcion.materiaUno.label }}</td>
-                                    <td>{{ inscripcion.materiaDos.label }}</td>
-                                    <td>{{ inscripcion.materiaTres.label }}</td>
-                                    <td>{{ inscripcion.materiaCuatro.label }}</td>
-                                    <td>{{ inscripcion.materiaCinco.label }}</td>
+                                    <td>{{ inscripcion.codigo }}</td> 
+                                    <td>{{ inscripcion.alumno.label }}</td>
+                                    <td>{{ inscripcion.materia.label }}</td>
+                                    <td>{{ inscripcion.materiados.label }}</td>
+                                    <td>{{ inscripcion.materiatres.label }}</td>
+                                    <td>{{ inscripcion.materiacuatro.label }}</td>
+                                    <td>{{ inscripcion.materiacinco.label }}</td>
+                                    <td>{{ inscripcion.fecha }}</td> 
                                     <td><button class="btn btn-danger" @click="eliminarInscripcion(inscripcion)">ELIMINAR</button></td>
                                 </tr>
                             </tbody>

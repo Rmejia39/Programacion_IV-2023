@@ -65,7 +65,7 @@ class Alumno{
         }
     }
     public function consultar(){
-        $this->db->consultas('SELECT * FROM alumnos');
+        $this->db->consultas('SELECT * FROM 'alumnos'');
         return $this->db->obtener_datos();
     }
 }
