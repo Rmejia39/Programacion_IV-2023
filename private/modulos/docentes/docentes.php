@@ -5,11 +5,12 @@ extract($_REQUEST);
 $docentes = isset($docentes) ? $docentes : '[]';
 $accion = isset($accion) ? $accion : '';
 $class_docente = new Docente($conexion);
-if( $accion=='consultar' ){
+if( $accion=='consultar'){
     print_r(json_encode($class_docente->consultar('')));
 }else{
     print_r($class_docente->recibir_datos($docentes));
 }
+
 class Docente{
     private $datos=[], $db, $respuesta=['msg'=>'ok'];
 
@@ -40,12 +41,14 @@ class Docente{
                     'INSERT INTO docentes VALUES(?,?,?)',
                     $this->datos['idDocente'], $this->datos['codigo'], $this->datos['nombre']
                 );
+
             }else if($accion=='modificar'){
                 return $this->db->consultas(
                     'UPDATE docentes SET codigo=?, nombre=? WHERE idDocente=?',
                     $this->datos['codigo'], $this->datos['nombre'], $this->datos['idDocente']
+
                 );
-            }else if($accion=='eliminar'){
+            }else if ($accion=='eliminar'){
                 return $this->db->consultas(
                     'DELETE docentes FROM docentes WHERE idDocente=?',
                     $this->datos['idDocente']
@@ -56,8 +59,10 @@ class Docente{
         }
     }
     public function consultar(){
+        // return $this->db->obtener('SELECT * FROM docentes');
         $this->db->consultas('SELECT * FROM docentes');
         return $this->db->obtener_datos();
     }
+       
 }
 ?>

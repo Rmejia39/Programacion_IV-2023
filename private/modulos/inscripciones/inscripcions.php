@@ -2,7 +2,7 @@
 include '../../Config/Config.php';
 extract($_REQUEST);
 
-$inscripciones = isset($inscripciones) ? $inscripciones : '[]';
+$inscripcions = isset($inscripcions) ? $inscripcions : '[]';
 $accion = isset($accion) ? $accion : '';
 $json_datos = json_encode($datos);
 $class_inscripcion = new Inscripcion($conexion);
@@ -62,7 +62,7 @@ class Inscripcion{
                 $materiacuatro = json_encode($this->datos['materiacuatro']['label']);
                 $materiacinco = json_encode($this->datos['materiacinco']['label']);
                 return $this->db->consultas(
-                    'INSERT INTO inscripciones VALUES(?,?,?,?,?,?,?,?,?)',
+                    'INSERT INTO inscripcions VALUES(?,?,?,?,?,?,?,?,?)',
                     $this->datos['idInscripcion'], $this->datos['codigo'], $alumno,
                     $materia, $materiados, $materiatres,$materiacuatro,$materiacinco,$this->datos['fecha']/*$this->datos['materia']['label']*/
                 );
@@ -74,14 +74,14 @@ class Inscripcion{
                 $materiacuatro = json_encode($this->datos['materiacuatro']['label']);
                 $materiacinco = json_encode($this->datos['materiacinco']['label']);
                 return $this->db->consultas(
-                    'UPDATE inscripciones SET codigo=?, alumno=?, materia=?, materiados=?,materiatres=?,
+                    'UPDATE inscripcions SET codigo=?, alumno=?, materia=?, materiados=?,materiatres=?,
                     materiacuatro=?,materiacinco=?, fecha=? WHERE idInscripcion=?',
                     $this->datos['codigo'], $alumno, $materia, $materiados,$materiatres,$materiacuatro,
                     $materiacinco,$this->datos['fecha'], $this->datos['idInscripcion']
                 );
             }else if($accion=='eliminar'){
                 return $this->db->consultas(
-                    'DELETE inscripciones FROM inscripciones WHERE idInscripcion=?', 
+                    'DELETE inscripcions FROM inscripcions WHERE idInscripcion=?', 
                     $this->datos['idInscripcion']
                 );
             }
@@ -90,7 +90,7 @@ class Inscripcion{
         }
     }
     public function consultar(){
-        $this->db->consultas('SELECT * FROM inscripciones');
+        $this->db->consultas('SELECT * FROM inscripcions');
         return $this->db->obtener_datos();
     }
 }

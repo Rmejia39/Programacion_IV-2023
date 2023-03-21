@@ -61,18 +61,18 @@ Vue.component('component-matriculas',{
         listar(){
             this.matriculas = JSON.parse( localStorage.getItem('matriculas') || "[]" )
                 .filter(matricula=>matricula.alumno.label.toLowerCase().indexOf(this.buscar.toLowerCase())>-1 ||
-                    matricula.fecha.indexOf(this.buscar)>-1);      
+                    matricula.fecha.indexOf(this.buscar)>-1);
             this.alumnos = JSON.parse( localStorage.getItem('alumnos') || "[]" ).map(alumno=>{
                 return { 
                     id: alumno.idAlumno,
                     label : alumno.nombre
                 }
             });
-            if( this.matriculas.length<=0 && this.buscar.trim().length<=0 ){
+            if( this.matricula.length<=0 && this.buscar.trim().length<=0 ){
                 fetch('private/modulos/matriculas/matriculas.php?accion=consultar')
                 .then(resp=>resp.json())
                 .then(resp=>{
-                    this.matriculas = resp;
+                    this.matricula = resp;
                     localStorage.setItem("matriculas", JSON.stringify(this.matriculas) );
                 });
             }

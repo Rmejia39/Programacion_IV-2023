@@ -1,13 +1,19 @@
+Vue.component('v-select-docentes', VueSelect.VueSelect);
 Vue.component('component-materias',{
     data() {
         return {
             accion:'nuevo',
             buscar: '',
             materias: [],
+            docentes : [],
             materia:{
-                idMateria : '',
-                codigo : '',
-                nombre : '',
+                idMateria  : '',
+                codigo     : '',
+                nombre     : '',
+                docente    : {
+                    id    : '',
+                    label : ''
+                },
             }
         }
     },
@@ -42,8 +48,10 @@ Vue.component('component-materias',{
         nuevoMateria(){
             this.accion = 'nuevo';
             this.materia.idMateria = '';
-            this.materia.codigo = '';
+            this.materia.codigo= '';
             this.materia.nombre = '';
+            this.materia.docente.id = '';
+            this.materia.docente.label = '';
         },
         modificarMateria(materia){
             this.accion = 'modificar';
@@ -51,27 +59,34 @@ Vue.component('component-materias',{
         },
         listar(){
             this.materias = JSON.parse( localStorage.getItem('materias') || "[]" )
-                .filter(materia=>materia.nombre.toLowerCase().indexOf(this.buscar.toLowerCase())>-1);
-                if( this.materias.length<=0 && this.buscar.trim().length<=0 ){
-                    fetch('private/modulos/materias/materias.php?accion=consultar')
-                    .then(resp=>resp.json())
-                    .then(resp=>{
-                        this.materias = resp;
-                        localStorage.setItem("materias", JSON.stringify(this.materias) );
-                    });
+                .filter(materia=>materia.docente.label.toLowerCase().indexOf(this.buscar.toLowerCase())>-1 ||
+                    materia.nombre.indexOf(this.buscar)>-1);
+            this.docentes = JSON.parse( localStorage.getItem('docentes') || "[]" ).map(docente=>{
+                return { 
+                    id: docente.idDocente,
+                    label : docente.nombre
                 }
+            });
+            if( this.materias.length<=0 && this.buscar.trim().length<=0 ){
+                fetch('private/modulos/materias/materias.php?accion=consultar')
+                .then(resp=>resp.json())
+                .then(resp=>{
+                    this.materias = resp;
+                    localStorage.setItem("materias", JSON.stringify(this.materias) );
+                });
+            }
         }
     },
     template: `
         <div class="row">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 <div class="card">
-                    <div class="card-header">REGISTRO DE MATERIA</div>
+                    <div class="card-header">REGISTRO DE MATERIAS</div>
                     <div class="card-body">
                         <form id="frmMateria" @reset.prevent="nuevoMateria" v-on:submit.prevent="guardarMateria">
                             <div class="row p-1">
                                 <div class="col-3 col-md-2">
-                                    <label for="txtCodigoMateria">CODIGO:</label>
+                                    <label>CODIGO MATERIA:</label>
                                 </div>
                                 <div class="col-3 col-md-3">
                                     <input required pattern="[0-9]{3}" 
@@ -80,12 +95,19 @@ Vue.component('component-materias',{
                                 </div>
                             </div>
                             <div class="row p-1">
-                                <div class="col-3 col-md-2">
-                                    <label for="txtNombreMateria">NOMBRE:</label>
+                                <div class="col col-md-2">NOMBRE MATERIA:</div>
+                                <div class="col col-md-2">
+                                    <input title="Escriba una materia" v-model="materia.nombre" pattern="[a-zA-zñÑàèìòù ]{3,75}" required type="text" class="form-control">
+
+                                    </input>
                                 </div>
-                                <div class="col-9 col-md-6">
-                                    <input required pattern="[A-Za-zÑñáéíóú0-9 ]{3,75}"
-                                        v-model="materia.nombre" type="text" class="form-control" name="txtNombreMateria" id="txtNombreMateria">
+                            </div>
+                            <div class="row p-1">
+                                <div class="col-3 col-md-2">
+                                    <label for="txtCodigoMateria">DOCENTE:</label>
+                                </div>
+                                <div class="col-3 col-md-6">
+                                    <v-select-docentes required v-model="materia.docente" :options="docentes" ></v-select-docentes>
                                 </div>
                             </div>
                             <div class="row p-1">
@@ -101,9 +123,7 @@ Vue.component('component-materias',{
                     </div>
                 </div>
             </div>
-
-            <div class="row p-5">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-12">
                 <div class="card">
                     <div class="card-header">LISTADO DE MATERIAS</div>
                     <div class="card-body">
@@ -111,26 +131,27 @@ Vue.component('component-materias',{
                             <thead>
                                 <tr>
                                     <th>BUSCAR:</th>
-                                    <th colspan="2"><input type="text" class="form-control" v-model="buscar"
+                                    <th colspan="3"><input type="text" class="form-control" v-model="buscar"
                                         @keyup="listar()"
                                         placeholder="Buscar por codigo o nombre"></th>
                                 </tr>
                                 <tr>
-                                    <th>CODIGO</th>
-                                    <th colspan="2">NOMBRE</th>
+                                    <th>Codigo</th>
+                                    <th>Nombre</th>
+                                    <th colspan="3">Docente</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="materia in materias" :key="materia.idMateria" @click="modificarMateria(materia)" >
-                                    <td>{{ materia.codigo }}</td>
+                                    <td>{{ materia.codigo }}</td> 
                                     <td>{{ materia.nombre }}</td>
+                                    <td>{{ materia.docente.label }}</td>
                                     <td><button class="btn btn-danger" @click="eliminarMateria(materia)">ELIMINAR</button></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
     `

@@ -81,7 +81,7 @@ Vue.component('component-alumnos',{
                                 </div>
                                 <div class="col-3 col-md-3">
                                     <input required pattern="[US|SM]{2}[IS|LI]{2}[0-9]{6}" 
-                                        title="Ingrese un codigo de alumno correcto"
+                                        title="Ingrese un codigo de alumno de 3 digitos"
                                             v-model="alumno.codigo" type="text" class="form-control" name="txtCodigoAlumno" id="txtCodigoAlumno">
                                 </div>
                             </div>
@@ -134,6 +134,7 @@ Vue.component('component-alumnos',{
                     </div>
                 </div>
             </div>
+
             <div class="col-12 col-md-6">
                 <div class="card">
                     <div class="card-header">LISTADO DE ALUMNOS</div>
@@ -142,13 +143,16 @@ Vue.component('component-alumnos',{
                             <thead>
                                 <tr>
                                     <th>BUSCAR:</th>
-                                    <th colspan="2"><input type="text" class="form-control" v-model="buscar"
+                                    <th colspan="5"><input type="text" class="form-control" v-model="buscar"
                                         @keyup="listar()"
                                         placeholder="Buscar por codigo o nombre"></th>
                                 </tr>
                                 <tr>
                                     <th>CODIGO</th>
-                                    <th colspan="5">NOMBRE</th>
+                                    <th>NOMBRE</th>
+                                    <th>DIRECCION</th>
+                                    <th>TELEFONO</th>
+                                    <th colspan="2">DUI</th>
                                 </tr>
                             </thead>
                             <tbody>

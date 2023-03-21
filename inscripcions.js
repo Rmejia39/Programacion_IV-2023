@@ -1,11 +1,11 @@
 Vue.component('v-select-materias', VueSelect.VueSelect);
 Vue.component('v-select-alumnos', VueSelect.VueSelect);
-Vue.component('component-inscripciones',{
+Vue.component('component-inscripcions',{
     data() {
         return {
             accion:'nuevo',
             buscar: '',
-            inscripciones: [],
+            inscripcions: [],
             materias : [],
             alumnos :[],
             inscripcion:{
@@ -36,8 +36,8 @@ Vue.component('component-inscripciones',{
                 let index = this.inscripcions.findIndex(inscripcion=>inscripcion.idInscripcion==this.inscripcion.idInscripcion);
                 this.inscripcions.splice(index,1);
             }
-            localStorage.setItem("inscripciones", JSON.stringify(this.inscripciones) );
-            fetch(`private/modulos/inscripciones/inscripciones.php?accion=${this.accion}&inscripciones=${JSON.stringify(this.inscripcion)}`)
+            localStorage.setItem("inscripcions", JSON.stringify(this.inscripcions) );
+            fetch(`private/modulos/inscripcions/inscripcions.php?accion=${this.accion}&inscripcions=${JSON.stringify(this.inscripcion)}`)
             .then(resp=>resp.json())
             .then(resp=>{
                 console.log(resp);
@@ -66,7 +66,7 @@ Vue.component('component-inscripciones',{
             this.inscripcion = inscripcion;
         },
         listar(){
-            this.inscripciones = JSON.parse( localStorage.getItem('inscripciones') || "[]" )
+            this.inscripcions = JSON.parse( localStorage.getItem('inscripcions') || "[]" )
                 .filter(inscripcion=>inscripcion.alumno.label.toLowerCase().indexOf(this.buscar.toLowerCase())>-1 ||
                     inscripcion.codigo.indexOf(this.buscar)>-1);
             this.materias = JSON.parse( localStorage.getItem('materias') || "[]" ).map(materia=>{
@@ -81,12 +81,12 @@ Vue.component('component-inscripciones',{
                     label : alumno.nombre
                 }
             });
-            if( this.inscripciones.length<=0 && this.buscar.trim().length<=0 ){
-                fetch('private/modulos/inscripciones/inscripciones.php?accion=consultar')
+            if( this.inscripcions.length<=0 && this.buscar.trim().length<=0 ){
+                fetch('private/modulos/inscripcions/inscripcions.php?accion=consultar')
                 .then(resp=>resp.json())
                 .then(resp=>{
-                    this.inscripciones = resp;
-                    localStorage.setItem("inscripciones", JSON.stringify(this.inscripciones) );
+                    this.inscripcions = resp;
+                    localStorage.setItem("inscripcions", JSON.stringify(this.inscripcions) );
                 });
             }
         }
@@ -196,7 +196,7 @@ Vue.component('component-inscripciones',{
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="inscripcion in inscripciones" :key="inscripcion.idInscripcion" @click="modificarInscripcion(inscripcion)" >
+                                <tr v-for="inscripcion in inscripcions" :key="inscripcion.idInscripcion" @click="modificarInscripcion(inscripcion)" >
                                     <td>{{ inscripcion.codigo }}</td> 
                                     <td>{{ inscripcion.alumno.label }}</td>
                                     <td>{{ inscripcion.materia.label }}</td>

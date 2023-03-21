@@ -4,13 +4,13 @@ class DB{
 
     public function __construct($server, $user, $pass){
         $this->conexion = new PDO($server, $user, $pass,
-            array(PDO::ATTR_EMULATE_PREPARES=>false,
-            PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION)) or die('Nose pudo conectar a la BD');
+           array(PDO::ATTR_EMULATE_PREPARES=>false,
+           PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION)) or die ('No se puedo conectar');
     }
     public function consultas($sql){
         try{
-            $parametros = func_get_args();//obtener todos los parametros de la consulta
-            array_shift($parametros);//quitamos el primer parametro que es la consulta
+            $parametros = func_get_args();
+            array_shift($parametros);
 
             $this->preparado = $this->conexion->prepare($sql);
             $this->result = $this->preparado->execute($parametros);

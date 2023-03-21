@@ -24,17 +24,17 @@ class Matricula{
         if(empty($this->datos['idMatricula'])){
             $this->respuesta['msg'] = 'Nose pudo seleccionar el ID';
         }
-        if(empty($this->datos['nombreAlumno'])){
-            $this->respuesta['msg'] = 'Por favor ingrese el nombre del alumno';
-        }
         if(empty($this->datos['fecha'])){
             $this->respuesta['msg'] = 'Por favor ingrese la fecha';
         }
         if(empty($this->datos['pago'])){
-            $this->respuesta['msg'] = 'Por favor ingrese el pago';
+            $this->respuesta['msg'] = 'Por favor confirme pago';
         }
-        if(empty($this->datos['imagen'])){
-            $this->respuesta['msg'] = 'Por favor ingrese una imagen';
+        if(empty($this->datos['comprobante'])){
+            $this->respuesta['msg'] = 'Por favor suba su comprobante';
+        }
+        if(empty($this->datos['alumno'])){
+            $this->respuesta['msg'] = 'Por favor seleccione un estudiante';
         }
         return $this->administrar_matricula();
     }
@@ -44,12 +44,14 @@ class Matricula{
             if($accion=='nuevo'){
                 return $this->db->consultas(
                     'INSERT INTO matriculas VALUES(?,?,?,?,?)',
-                    $this->datos['idMatricula'], $this->datos['nombreAlumno'], $this->datos['fecha'], $this->datos['pago'], $this->datos['imagen']
+                    $this->datos['idMatricula'], $this->datos['fecha'], $this->datos['pago'],
+                    $this->datos['comprobante'],$this->datos['alumno']
                 );
             }else if($accion=='modificar'){
                 return $this->db->consultas(
-                    'UPDATE matriculas SET nombreAlumno=?, fecha=?, pago=?, imagen=? WHERE idMatricula=?',
-                    $this->datos['nombreAlumno'], $this->datos['fecha'], $this->datos['pago'], $this->datos['imagen'], $this->datos['idMatricula']
+                    'UPDATE matriculas SET fecha=?, pago=?, comprobante=?, alumno=? WHERE idMatricula=?',
+                    $this->datos['fecha'], $this->datos['alumno'], $this->datos['pago'],$this->datos['comprobante'],
+                    $this->datos['idMatricula']
                 );
             }else if($accion=='eliminar'){
                 return $this->db->consultas(

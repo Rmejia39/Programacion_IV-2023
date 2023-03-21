@@ -52,7 +52,7 @@ Vue.component('component-docentes',{
         listar(){
             this.docentes = JSON.parse( localStorage.getItem('docentes') || "[]" )
                 .filter(docente=>docente.nombre.toLowerCase().indexOf(this.buscar.toLowerCase())>-1);
-            if( this.docentes.length<=0 && this.buscar.trim().length<=0 ){
+            if(this.docentes.length<=0 && this.buscar.trim().length<=0 ){
                 fetch('private/modulos/docentes/docentes.php?accion=consultar')
                 .then(resp=>resp.json())
                 .then(resp=>{
@@ -60,6 +60,7 @@ Vue.component('component-docentes',{
                     localStorage.setItem("docentes", JSON.stringify(this.docentes) );
                 });
             }
+            
         }
     },
     template: `
